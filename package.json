@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "shadow-cljs": "^2.20.14",
+    "tailwindcss": "2.2.9"
+  },
+  "dependencies": {
+    "highlight.js": "11.5.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
