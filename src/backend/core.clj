@@ -24,13 +24,15 @@
       (PUT "/:id" req (h/edit-application-by-id req))))
   (route/not-found "<h1>Page not found</h1>"))
 
+(def db-uri (or (env :db-uri) "datomic:mem://prod"))
+
 (def app
   (-> app-routes
       (wrap-cors :access-control-allow-origin [#".*"]
                  :access-control-allow-methods [:get :put :post])
       (wrap-resource "public")
-      (wrap-datomic (env :db-uri))
-      (wrap-create-db (env :db-uri))
+      (wrap-datomic db-uri)
+      (wrap-create-db db-uri)
       (wrap-json-body {:keywords? true})
       (wrap-json-response)
       (wrap-with-logger)))
