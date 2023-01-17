@@ -28,6 +28,7 @@
     :reagent-render
     (fn []
       (let [application @(rf/subscribe [:application])
+            application-data (:data application)
             persons @(rf/subscribe [:persons])]
         [:<>
          (if index
@@ -38,21 +39,12 @@
                  (when index (:is-application-loading? application)))
            [:h2.text-xl.pt-4.text-center "Loading..."]
            [:<>
-            (let [key :title]
-              [input "Title"
-               "text"
-               (key (:data application))
-               (handle-change key)
-               (s/valid? ::f/title (key (:data application)))
-               (f/get-message (s/explain-data ::f/title (key (:data application))))])
 
-            (let [key :description]
-              [input "Descripton"
-               "text"
-               (key (:data application))
-               (handle-change key)
-               (s/valid? ::f/description (key (:data application)))
-               (f/get-message (s/explain-data ::f/description (key (:data application))))])
+            (let [kw :title]
+              [input "Title" "text" (kw application-data) kw])
+
+            (let [kw :description]
+              [input "Descripton" "text" (kw application-data) kw])
 
             (let [key :applicant]
               [select "Applicant"
@@ -70,13 +62,8 @@
                (s/valid? ::f/executor (key (:data application)))
                (f/get-message (s/explain-data ::f/executor (key (:data application))))])
 
-            (let [key :deadline]
-              [input "Deadline"
-               "date"
-               (key (:data application))
-               (handle-change key)
-               (s/valid? ::f/deadline (key (:data application)))
-               (f/get-message (s/explain-data ::f/deadline (key (:data application))))])
+            (let [kw :deadline]
+              [input "Deadline" "date" (kw application-data) kw])
 
             [:button {:class "p-1 bg-gray-200 hover:bg-gray-300"
                       :on-click
