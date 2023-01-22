@@ -1,10 +1,9 @@
 (ns backend.db
   (:require
-    [backend.db-scheme :as s]
-    [clj-time.coerce :as c]
-    [clj-time.format :as fmt]
-    [datomic.api :as d]))
-
+   [backend.db-scheme :as s]
+   [clj-time.coerce :as c]
+   [clj-time.format :as fmt]
+   [datomic.api :as d]))
 
 (def persons-list
   "Static data for example"
@@ -14,7 +13,6 @@
    {:db/id (d/tempid :db.part/user)
     :person/name "Aurora"
     :person/index 2}])
-
 
 (defn wrap-create-db
   "A Ring middleware that create db, add schemes, add init static data
@@ -29,7 +27,6 @@
           (d/transact conn persons-list)))
       (handler request))))
 
-
 (defn wrap-datomic
   "A Ring middleware that provides a request-consistent database connection and
   value for the life of a request."
@@ -40,25 +37,15 @@
                       :conn conn
                       :db   (d/db conn))))))
 
-
-(defn eid
-  "Helper to get entity id"
-  [db attr val]
-  (->> (d/q '[:find ?e :in $ ?a ?v :where [?e ?a ?v]] db attr val)
-       ffirst))
-
-
 (def all-persons-q
   '[:find ?id ?index ?name
     :where
     [?id :person/name ?name]
     [?id :person/index ?index]])
 
-
 (defn get-persons
   [db]
   (mapv (partial zipmap [:id :index :name]) (d/q all-persons-q db)))
-
 
 ;; APPLICATION
 (def application-rule
@@ -69,7 +56,6 @@
      [?id :application/applicant ?applicant]
      [?id :application/executor ?executor]
      [?id :application/deadline ?deadline]]])
-
 
 (def applications-rule
   '[[(applications-rule ?id ?index  ?title ?description ?applicant ?executor ?deadline)
@@ -82,7 +68,6 @@
      [?id :application/executor ?eid]
      [?id :application/deadline ?deadline]]])
 
-
 ;; APPLICATION QUERIES
 (def all-application-q
   '[:find ?id ?index ?title ?description ?applicant ?executor ?deadline
@@ -91,13 +76,11 @@
     (applications-rule ?id ?index ?title ?description
                        ?applicant ?executor ?deadline)])
 
-
 (def application-by-id-q
   '[:find ?id ?index ?title ?description ?applicant ?executor ?deadline
     :in $ % ?id
     :where (application-rule ?id ?index ?title ?description
                              ?applicant ?executor ?deadline)])
-
 
 (def application-by-index-q
   '[:find ?id ?index ?title ?description ?applicant ?executor ?deadline
@@ -105,29 +88,24 @@
     :where (application-rule ?id ?index ?title ?description
                              ?applicant ?executor ?deadline)])
 
-
 ;; APPLICATION HANDLERS
 (def application-keys
   [:id :index :title :description :applicant :executor :deadline])
-
 
 (defn get-applications
   [db]
   (mapv (partial zipmap application-keys)
         (d/q all-application-q db applications-rule)))
 
-
 (defn get-application-by-index
   [index db]
   (map (partial zipmap application-keys)
        (d/q application-by-index-q db application-rule (Integer/parseInt index))))
 
-
 (defn get-application-by-id
   [id db]
   (map (partial zipmap application-keys)
        (d/q application-by-id-q db application-rule id)))
-
 
 (defn get-applications-max-index
   [db]
@@ -135,7 +113,6 @@
          :where
          [?id :application/index ?index]]
        db))
-
 
 (defn create-application
   [{:keys [title description applicant executor deadline]} conn db]
@@ -149,7 +126,6 @@
                         :application/applicant (bigint applicant)
                         :application/executor (bigint executor)
                         :application/deadline (c/to-date (fmt/parse deadline))}])))
-
 
 (defn edit-application
   [id {:keys [title description applicant executor deadline]} conn]
